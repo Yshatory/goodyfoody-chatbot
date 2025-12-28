@@ -77,6 +77,35 @@ export default function ChatWidget() {
     }).catch(() => {});
   };
 
+  const sendToN8nAndGetResponse = async (payload: {
+    sessionId: string;
+    intent: string;
+    step: Step;
+    text?: string;
+  }) => {
+    if (!N8N_WEBHOOK_URL || N8N_WEBHOOK_URL.includes("JOUW_N8N_WEBHOOK_URL")) return;
+    
+    try {
+      const response = await fetch(N8N_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      
+      const data = await response.json();
+      
+      // Display AI response
+      if (data.output) {
+        typeBotMessage(data.output, 8);
+      } else if (data.response) {
+        typeBotMessage(data.response, 8);
+      }
+    } catch (error) {
+      console.error('n8n error:', error);
+      typeBotMessage("Sorry, er ging iets mis. Probeer het opnieuw.");
+    }
+  };
+
   const typeBotMessage = (text: string, delay = 6) => {
     setMessages((p) => [...p, { role: "bot", text: "" }]);
     let i = 0;
@@ -911,17 +940,19 @@ export default function ChatWidget() {
                 }}
               />
               <button
-                onClick={() => {
+                onClick={async () => {
                   const text = userInput.trim();
                   if (!text) return;
                   setMessages((p) => [...p, { role: "user", text }]);
-                  sendToN8n({
+                  setUserInput("");
+                  
+                  // Send to n8n and wait for response
+                  await sendToN8nAndGetResponse({
                     sessionId: sessionIdRef.current,
                     intent: "user_message",
                     step,
                     text,
                   });
-                  setUserInput("");
                 }}
                 style={{
                   width: 40,

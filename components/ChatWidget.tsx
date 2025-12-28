@@ -42,7 +42,7 @@ type Message = {
   text: ReactNode;
 };
 
-const N8N_WEBHOOK_URL = "https://JOUW_N8N_WEBHOOK_URL";
+const N8N_WEBHOOK_URL = "https://n8n.kemetops.cloud/webhook/GoodyFoody";
 
 export default function ChatWidget() {
   const [step, setStep] = useState<Step>("home");

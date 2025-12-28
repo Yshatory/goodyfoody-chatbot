@@ -86,6 +86,8 @@ export default function ChatWidget() {
     if (!N8N_WEBHOOK_URL || N8N_WEBHOOK_URL.includes("JOUW_N8N_WEBHOOK_URL")) return;
     
     try {
+      console.log("Sending to n8n:", payload);
+      
       const response = await fetch(N8N_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,11 +96,18 @@ export default function ChatWidget() {
       
       const data = await response.json();
       
-      // Display AI response
+      console.log("n8n response:", data);
+      
+      // Display AI response - check multiple possible fields
       if (data.output) {
-        typeBotMessage(data.output, 8);
+        console.log("Using data.output:", data.output);
+        typeBotMessage(data.output);
       } else if (data.response) {
-        typeBotMessage(data.response, 8);
+        console.log("Using data.response:", data.response);
+        typeBotMessage(data.response);
+      } else {
+        console.error("No response found in data:", data);
+        typeBotMessage("Ik heb je bericht ontvangen! 👍");
       }
     } catch (error) {
       console.error('n8n error:', error);
@@ -107,19 +116,8 @@ export default function ChatWidget() {
   };
 
   const typeBotMessage = (text: string, delay = 6) => {
-    setMessages((p) => [...p, { role: "bot", text: "" }]);
-    let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      setMessages((p) => {
-        const last = p[p.length - 1];
-        if (last.role !== "bot") return p;
-        const updated = [...p];
-        updated[updated.length - 1] = { ...last, text: text.slice(0, i) };
-        return updated;
-      });
-      if (i >= text.length) clearInterval(interval);
-    }, delay);
+    // Instant message - no animation
+    setMessages((p) => [...p, { role: "bot", text }]);
   };
 
   useEffect(() => {
@@ -302,6 +300,9 @@ export default function ChatWidget() {
                     fontSize: 14,
                     lineHeight: "1.4",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    wordWrap: "break-word",
+                    overflowWrap: "break-word",
+                    whiteSpace: "pre-wrap",
                   }}
                 >
                   {m.text}

@@ -1,4 +1,3 @@
-Html widget code full ps: design must stay exactly the same:
 import { useState, useRef, useEffect } from "react";
 import type { CSSProperties, ReactNode } from "react";
 type Step =
